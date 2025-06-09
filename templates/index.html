@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Summarization</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="hidden fixed inset-0 bg-white bg-opacity-90 z-50 flex items-center justify-center"
+    >
+      <div class="text-center">
+        <svg
+          class="animate-spin h-10 w-10 text-blue-600 mx-auto mb-2"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
+        </svg>
+        <p class="text-blue-700 font-semibold text-lg">Generating Summary...</p>
+      </div>
+    </div>
+
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-10">
+      <div class="container mx-auto py-4 text-center text-2xl font-bold">
+        Data Summarization
+      </div>
+    </header>
+
+    <main
+      class="container mx-auto flex flex-col md:flex-row gap-6 mt-6 px-4 pb-10"
+    >
+      <!-- Input Form -->
+      <div class="md:w-1/2 bg-white shadow-md rounded-lg p-6 flex flex-col">
+        <form
+          action="{{ url_for('Summarize') }}"
+          method="post"
+          class="flex flex-col h-full"
+          onsubmit="return handleSubmit()"
+        >
+          <label for="data" class="text-lg font-medium mb-2"
+            >Enter your Data:</label
+          >
+          <textarea
+            name="data"
+            id="data"
+            rows="10"
+            required
+            placeholder="Paste your data here..."
+            class="border border-gray-300 rounded-md p-3 resize-none mb-4 flex-grow"
+          >
+{{olddata}}</textarea
+          >
+
+          <div class="mt-4">
+            <label for="maxL" class="block text-sm font-medium mb-1">
+              Select Maximum Summary Length:
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                type="range"
+                min="50"
+                max="1000"
+                value="300"
+                name="maxL"
+                id="maxL"
+                class="flex-grow"
+                oninput="document.getElementById('lengthValue').innerText = this.value"
+              />
+              <span id="lengthValue" class="text-gray-700 font-medium"
+                >300</span
+              >
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              type="submit"
+              class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded transition"
+            >
+              Submit
+            </button>
+            <button
+              type="reset"
+              class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition"
+            >
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Output Section -->
+      <div class="md:w-1/2 bg-white shadow-md rounded-lg p-6 flex flex-col">
+        <label for="result" class="text-lg font-medium mb-2">Summary:</label>
+        <textarea
+          id="result"
+          name="result"
+          rows="10"
+          readonly
+          placeholder="Your summary will appear here..."
+          class="border border-green-400 bg-gray-50 rounded-md p-3 resize-none flex-grow mb-4"
+        >
+{{result}}</textarea
+        >
+        <button
+          onclick="copySummary()"
+          class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded self-center transition"
+        >
+          Copy Text
+        </button>
+      </div>
+    </main>
+
+    <script>
+      function copySummary() {
+        const textarea = document.getElementById("result");
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(textarea.value);
+        alert("Summary copied to clipboard!");
+      }
+
+      function handleSubmit() {
+        const text = document.getElementById("data").value;
+        const reg = /<(.|\n)*?>/g;
+        if (reg.test(text)) {
+          alert("Error: Make sure you provide valid data without HTML tags.");
+          return false;
+        }
+        document.getElementById("loadingOverlay").classList.remove("hidden");
+        return true;
+      }
+    </script>
+  </body>
+</html>
